@@ -80,7 +80,10 @@ data CmdLine
 
 defaultDatabaseLang :: Language -> IO FilePath
 defaultDatabaseLang lang = do
-    dir <- getAppUserDataDirectory "hoogle"
+    xdgLocation <- getXdgDirectory XdgData "hoogle"
+    legacyLocation <- getAppUserDataDirectory "hoogle"
+    canIgnoreLegacyPath <- not <$> doesPathExist legacyLocation
+    let dir = if canIgnoreLegacyPath then xdgLocation else legacyLocation
     pure $ dir </> "default-" ++ lower (show lang) ++ "-" ++ showVersion (trimVersion 3 version) ++ ".hoo"
 
 getCmdLine :: [String] -> IO CmdLine
